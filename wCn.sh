@@ -2,6 +2,7 @@
 set -e
 
 # Statics
+_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )/"
 red=`tput setaf 1`; green=`tput setaf 2`; yellow=`tput setaf 3`; blue=`tput setaf 4`; magenta=`tput setaf 5`; bow=`tput setaf 0;tput setab 7`; reset=`tput sgr0`; hk="${blue})${reset}"; undl=`tput smul`; bold=`tput bold`;
 
 #
@@ -24,11 +25,18 @@ function _jq() {
     echo ${1} | base64 --decode | jq -r ${2}
 }
 
-# Ensure json file exists
+# Check JQ dependency
+hash "jq" 2>/dev/null || { printf >&2 "\n${red}\n\tDepeneancy error!${reset}\n\n\tsoSsh requires ${bold}jq{$reset} package!\n\n\t${green}Please install with ${bold}sudo apt install jq${green}!${reset}"; exit 2; }
 
+# Ensure json file exists
+if [ ! -f ~/.sossh ]; then
+    echo -e "\n${red}\n\tNo config found!${reset}\n\n\n\t${green}Please create you local soSsh object at ${bold}~/.sossh${reset}\n"
+    touch ~/.sossh
+    exit 3
+fi
 
 # Read JSON & Get some basics
-raw=`jq . wCn.json`
+raw=`jq . "${_DIR}wCn.json"`
 b_port=$(echo $raw | jq -r '.default.port // 22')
 b_user=$(echo $raw | jq -r '.default.user // "root"')
 b_rsub=$(echo $raw | jq -r '.default.rsub // false')
@@ -55,8 +63,12 @@ while [[ $reached_end == false ]]; do
 
         # Read input && search for matching group id
         read -sn1 input
-        last_while_obj=`echo ${last_while_obj} | jq ".g[]  | select(.id == ${input})"`
-        ((depth++)) && continue
+        f_tmp=`echo ${last_while_obj} | jq ".g[]  | select(.id == ${input})"`
+
+        # Retry or continue
+        [[ -z $f_tmp ]] && echo -e "\n${red}${bold}Group${reset}${red} not found!${reset}\n" && continue || last_while_obj="$f_tmp"
+        # [[ -z $f_tmp ]] && echo -e "\n${red}Server not found!${reset}\n" && continue
+
     fi
 
     # S
@@ -72,7 +84,9 @@ while [[ $reached_end == false ]]; do
         # Read input & get matching server
         read -sn1 input
         f_tmp=$(echo "$last_while_obj" | jq -r ".s[] | select(.id == ${input})")
-        [[ -z $f_tmp ]] && exitByError 'Server not found!'
+
+        # Retry or continue
+        [[ -z $f_tmp ]] && echo -e "\n${red}${bold}Server${reset}${red} not found!${reset}\n" && continue
 
         # T
         has_t=$(echo "${f_tmp}" | jq ".t")
@@ -104,11 +118,16 @@ while [[ $reached_end == false ]]; do
                 echo -e "${prefix}            ${h_i}${hk} ${t_name} ($t_ip)"
             done
 
-            # Read and validate input
-            read -sn1 input
-            if [[ "$input" -lt "0" ]] || [[ "$input" -gt "$has_t" ]]; then
-                exitByError "Server #${input} not found!"
-            fi
+            # Read and validate input until valid
+            t_w_r=false; while [[ $t_w_r == false ]]; do
+                read -sn1 input
+                if [[ "$input" -lt "0" ]] || [[ "$input" -gt "$has_t" ]]; then
+                    # Retry
+                    echo -e "\n${red}${bold}Server #${input}${reset}${red} not found!${reset}\n"
+                    continue
+                fi
+                t_w_r=true
+            done
 
             # Replace ?? with number
             f_ip=$(echo ${g_b_ip/\?\?/$i})

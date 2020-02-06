@@ -1,11 +1,37 @@
 
-## soSsh:
+# soSsh:
 Group based ssh connection script!
 
-### Config
-Config file: `~/.sossh`
+## Features
+All features are configurable per server. If not provided, `default` is used.
+ - Custom ssh port
+ - [RemoteSubl](https://github.com/randy3k/RemoteSubl)
+ - Dynamic server list (Manger1, Manger2, Manger3, ...)
 
-example:
+Coming soon
+ - GPG Keys
+
+Overview
+| Field | Required | Default |      -      |
+|:-----:|:--------:|:-------:|:-----------:|
+|   id  |     ✓    |   null  |  Select id  |
+|   ip  |     ✓    |   null  |             |
+|  name |     ✓    |    -    | Server name |
+|  rsub |     ☓    |  false  |             |
+
+## Usage
+### Config file
+`soSsh` looks for a file named `.sossh` in the user's home directory.
+If no config is found, `soSsh` creates and empty file and exits
+
+### Config objects
+#### Default
+Set default fallback value for value's. If a
+```
+```
+
+### Example config
+`nano ~/.sossh`
 ```
 {
     "default": {

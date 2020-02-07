@@ -22,10 +22,11 @@ or
 sudo ln -s /tmp/soSsh/soSsh /usr/local/bin/
 ```
 ## Features
-All features are configurable per server. If not provided, `default` is used.
+All features are configurable per server. If not provided, [default value](#default) is used.
  - Custom ssh port
  - [RemoteSubl](https://github.com/randy3k/RemoteSubl)
  - Dynamic server list (Manger1, Manger2, Manger3, ...)
+ - [Quick Connect](#quick-connect). Add unique name to server, connect instant!
 
 Coming soon
  - GPG Keys

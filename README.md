@@ -2,6 +2,25 @@
 # soSsh:
 Group based ssh connection script!
 
+## Setup
+### Clone
+```
+git clone https://github.com/0stone0/soSsh.git /tmp/soSsh
+```
+### Make executable
+```
+sudo chmod +x /tmp/soSsh/soSsh
+```
+### Create config
+Please see [example config](#example-config)
+### Set global (Optionally)
+```
+sudo cp /tmp/soSsh/soSsh /usr/local/bin
+```
+or
+```
+sudo ln -s /tmp/soSsh/soSsh /usr/local/bin/
+```
 ## Features
 All features are configurable per server. If not provided, `default` is used.
  - Custom ssh port
@@ -14,7 +33,8 @@ Coming soon
 ## Usage
 ### Config file
 `soSsh` looks for a file named `.sossh` in the user's home directory.
-If no config is found, `soSsh` creates and empty file and exits
+
+If no config is found, `soSsh` creates an empty file and exits
 
 ### Config objects
 #### Default
@@ -29,7 +49,7 @@ Set default fallback value for connections. If default entry does not exists, th
 ```
 
 #### g (Group)
-Use `g` to define a group, each group should contain a deeper group, or a server list
+Use `g` to define a group, each group should contain a deeper group (`g`), or a server list (`s`).
 ```
 {
     "g": [
@@ -54,13 +74,14 @@ Use `g` to define a group, each group should contain a deeper group, or a server
 }
 ```
 #### s (Server)
-| Field | Required | Fallback | Use |
+| Field | Required | Fallback | Usage |
 |:-----:|:--------:|:-------:|:-----------:|
 |   id  |     ✓    |    -    |  Select id  |
-|   ip  |     ✓    |    -    |             |
+|   ip  |     ✓    |    -    |  Server ip  |
 |  name |     ✓    |    -    | Server name |
-|  port |     ☓    |    22    | Server name |
-|  rsub |     ☓    |  false  |             |
+|  port |     ☓    |   22    | Server port |
+|   qc  |     ☓    |    -    | [Quick Connect](#quick-connect) |
+|  rsub |     ☓    |  false  | Port number |
 
 ```
 {
@@ -69,7 +90,21 @@ Use `g` to define a group, each group should contain a deeper group, or a server
     "ip": "thisissoawesome.com",
 }
 ```
+##### Quick Connect
+Add an unique identifyer to your server;
+```
+{
+    "id": 8,
+    "name": "FooServer",
+    "ip": "1.2.3.4",
+    "qc": "foo"
+}
+```
 
+You can target the server without 'searching' for it by adding the `qc` to the command;
+```
+soSsh foo
+```
 ##### Dynamic
 Add an `t` field to the sever object descibing how many servers are available.
 Add `??` to the server `name` and/or `ip`, this will be replaces `1` to `t`
@@ -102,27 +137,22 @@ Add `??` to the server `name` and/or `ip`, this will be replaces `1` to `t`
             "name": "Private",
             "g": [
                 {
-                    "id": 1,
+                    "id": 0,
                     "name": "Plex",
-                    "s": [
-                        {
-                            "id": 0,
-                            "name": "Plex",
-                            "ip": "myplexserver.com",
-                        },
-                        {
-                            "id": 1,
-                            "name": "Gitlab",
-                            "ip": "mygitlab.com"
-                        },
-                        {
-                            "id": 2,
-                            "name": "Storage",
-                            "ip": "8.8.8.8",
-                            "rsub": "52698"
-                        }
-                    ]
+                    "ip": "myplexserver.com",
                 },
+                {
+                    "id": 1,
+                    "name": "Gitlab",
+                    "ip": "mygitlab.com",
+                    "qc": git
+                },
+                {
+                    "id": 2,
+                    "name": "Storage",
+                    "ip": "8.8.8.8",
+                    "rsub": "52698"
+                }
             ]
         },
         {

@@ -25,6 +25,62 @@ function _jq() {
     echo ${1} | base64 --decode | jq -r ${2}
 }
 
+#
+#       validateInput
+#       Validates user input
+#       Skip's while loop if invalid
+#
+function validateInput() {
+
+    # Only allow 0-9
+    re='^[0-9]+$'
+    if ! [[ $input =~ $re ]]; then
+        echo -e "\n${red}\n\tInvalid response!${reset}\n"
+        continue
+    fi
+}
+
+#
+#       connectToServer()
+#       Creat and execute command
+#       Use $f_s as server json
+#
+function connectToServer() {
+
+    # Get server data, use default by null
+    # echo -e "\n\n${f_s}\n\n"
+    to_ip=$(echo "$f_s" | jq -r ".ip")
+    to_port=$(echo "$f_s" | jq -r ".port // ${b_port}")
+    to_user=$(echo "$f_s" | jq -r ".user // \"${b_user}\"")
+    to_rsub=$(echo "$f_s" | jq -r "select(.rsub != false) | .rsub // \"${b_rsub}\"")
+    to_gpg=$(echo "$f_s" | jq -r "select(.gpg != false) | .gpg // \"${b_gpg}\"")
+
+    # Ensure ip is found
+    [[ "$to_ip" == '' ]] && exitByError 'Invalid ip'
+
+    # Create cmd, start with rsub
+    [[ ! -z $to_rsub && "$to_rsub" != false ]] && TO_CMD="-R ${to_rsub}:localhost:${to_rsub} ${TO_CMD}"
+    TO_CMD="ssh -A ${TO_CMD} -p ${to_port} ${to_user}@${to_ip}"
+
+    # Get gpg dat
+
+    # Print '--' if depth > 0
+    if [[ "$depth" -gt "0" ]]; then
+        echo -e "\n${prefix}  ---------"
+    fi
+
+    # Print
+    cat << EOF
+
+${undl}Connecting...${reset}
+${bold}$(echo "$f_s" | jq -r ".name // \"--\"")${reset}
+${green}${to_user}${reset}${bold}@${reset}${yellow}${to_ip}${reset}${bold}:${reset}${green}${to_port}${reset}
+EOF
+
+    # We're done!
+    exit 0
+}
+
 # Check JQ dependency
 hash "jq" 2>/dev/null || { printf >&2 "\n${red}\n\tDependency error!${reset}\n\n\tsoSsh requires ${bold}jq{$reset} package!\n\n\t${green}Please install with ${bold}sudo apt install jq${green}!${reset}"; exit 2; }
 
@@ -35,11 +91,27 @@ if [ ! -f ~/.sossh ]; then
     exit 3
 fi
 
-# Read JSON & Get some basics
+# Read JSON
 raw=`jq . ~/.sossh`
+
+# Get some defaults
+b_gpg=$(echo $raw | jq -r '.default.GPG // false')
 b_port=$(echo $raw | jq -r '.default.port // 22')
 b_user=$(echo $raw | jq -r '.default.user // "root"')
 b_rsub=$(echo $raw | jq -r '.default.rsub // false')
+
+# Check for a qc param
+if [ ! -z $1 ]; then
+
+    # Search and loop throug given QC
+    qc=$(echo $raw | jq -r ".. | select(.qc? == \"${1}\") // empty")
+
+    # Not found
+    [[ -z $qc ]] && exitByError "${bold}Q${reset}${red}uick-${bold}C${reset}${red}onnect not found!"
+
+    # Connect
+    f_s="${qc}" && connectToServer
+fi
 
 # Ask for servers until we've reached the end
 depth=1
@@ -62,7 +134,7 @@ while [[ $reached_end == false ]]; do
         done
 
         # Read input && search for matching group id
-        read -sn1 input
+        read -sn1 input && validateInput
         f_tmp=`echo ${last_while_obj} | jq ".g[]  | select(.id == ${input})"`
 
         # Retry or continue
@@ -149,21 +221,5 @@ while [[ $reached_end == false ]]; do
     fi
 done
 
-# echo -e "\n\n${f_s}\n\n"
-
-# Get server data, use default by null
-to_ip=$(echo "$f_s" | jq -r ".ip")
-to_port=$(echo "$f_s" | jq -r ".port // ${b_port}")
-to_user=$(echo "$f_s" | jq -r ".user // \"${b_user}\"")
-to_rsub=$(echo "$f_s" | jq -r "select(.rsub != false) | .rsub // \"${b_rsub}\"")
-
-# Ensure ip is found
-[[ "$to_ip" == '' ]] && exitByError 'Invalid ip'
-
-# Create cmd, start with rsub
-[[ ! -z $to_rsub && "$to_rsub" != false ]] && TO_CMD="-R ${to_rsub}:localhost:${to_rsub} ${TO_CMD}"
-TO_CMD="ssh -A ${TO_CMD} -p ${to_port} ${to_user}@${to_ip}"
-
-# Print
-# echo -e "\n\n${TO_CMD}"
-echo -e "\n-----------------\n\n${green}Trying to connect to:${reset} ${red}${to_user}${magenta}@${yellow}${to_ip}${magenta}:${green}${to_port} ${reset}\n"
+# Connect
+connectToServer

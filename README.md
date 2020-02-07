@@ -88,7 +88,7 @@ Use `g` to define a group, each group should contain a deeper group (`g`), or a 
 {
     "id": 1,
     "name": "Awesome Server",
-    "ip": "thisissoawesome.com",
+    "ip": "thisissoawesome.com"
 }
 ```
 ##### Quick Connect
@@ -115,7 +115,7 @@ Add `??` to the server `name` and/or `ip`, this will be replaces `1` to `t`
     "name": "Manager - ??",
     "ip": "manager??.office.com",
     "t": 3
-},
+}
 ```
 ```
 1) Manager -- 1 (manager1.office.com)

@@ -159,7 +159,7 @@ while [[ $reached_end == false ]]; do
         done
 
         # Read input & get matching server
-        read -sn1 input
+        read -sn1 input && validateInput
         f_tmp=$(echo "$last_while_obj" | jq -r ".s[] | select(.id == ${input})")
 
         # Retry or continue
@@ -197,7 +197,7 @@ while [[ $reached_end == false ]]; do
 
             # Read and validate input until valid
             t_w_r=false; while [[ $t_w_r == false ]]; do
-                read -sn1 input
+                read -sn1 input && validateInput
                 if [[ "$input" -lt "0" ]] || [[ "$input" -gt "$has_t" ]]; then
                     # Retry
                     echo -e "\n${red}${bold}Server #${input}${reset}${red} not found!${reset}\n"

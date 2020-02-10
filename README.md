@@ -87,6 +87,7 @@ Use `g` to define a group, each group should contain a deeper group (`g`), or a 
 |   ip  |     ✓    |    -    |  Server ip  |
 |  name |     ✓    |    -    | Server name |
 |  port |     ☓    |   22    | Server port |
+|  sshkey |     ☓    |   -    | id_rsa path |
 |   qc  |     ☓    |    -    | [Quick Connect](#quick-connect) |
 |  rsub |     ☓    |  false  | Port number |
 
@@ -94,7 +95,8 @@ Use `g` to define a group, each group should contain a deeper group (`g`), or a 
 {
     "id": 1,
     "name": "Awesome Server",
-    "ip": "thisissoawesome.com"
+    "ip": "thisissoawesome.com",
+    "sshkey": "/home/foo/.ssh/id_rsa"
 }
 ```
 ##### Quick Connect

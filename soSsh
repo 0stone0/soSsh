@@ -68,6 +68,7 @@ function connectToServer() {
 
     # Get server data, use default by null
     to_ip=$(echo "$f_s" | jq -r ".ip")
+    to_key=$(echo "$f_s" | jq -r ".sshkey // false")
     to_port=$(echo "$f_s" | jq -r ".port // ${b_port}")
     to_user=$(echo "$f_s" | jq -r ".user // \"${b_user}\"")
     to_rsub=$(echo "$f_s" | jq -r "select(.rsub != false) | .rsub // \"${b_rsub}\"")
@@ -77,15 +78,18 @@ function connectToServer() {
     [[ "$to_ip" == '' ]] && exitByError 'Invalid ip'
 
     # Create cmd, start with rsub
-    [[ ! -z $to_rsub && "$to_rsub" != false ]] && TO_CMD="-R ${to_rsub}:localhost:${to_rsub} ${TO_CMD}"
+    [[ ! -z $to_rsub && "$to_rsub" != false ]] && TO_CMD="-R ${to_rsub}:localhost:${to_rsub}"
+
+    # Add ssh-key
+    [[ "${to_key}" != false ]] && TO_CMD=" -i ${to_key}"
+
+    # Add 'ssh', port, user and ip
     TO_CMD="ssh -A ${TO_CMD} -p ${to_port} ${to_user}@${to_ip}"
 
     # Get gpg data
 
     # Print '--' if depth > 0
-    if [[ "$depth" -gt "0" ]]; then
-        echo -e "\n${prefix}  ---------"
-    fi
+    [[ "$depth" -gt "0" ]] && echo -e "\n${prefix}  ---------"
 
     # Print
     cat << EOF

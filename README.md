@@ -32,6 +32,12 @@ Coming soon
  - GPG Keys
 
 ## Usage
+```
+soSsh [-d] [-q QuickConnect]
+
+    -d        Debug
+    -q <qc>   QuickConnect
+```
 ### Config file
 `soSsh` looks for a file named `.sossh` in the user's home directory.
 

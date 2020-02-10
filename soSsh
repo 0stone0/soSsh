@@ -4,6 +4,20 @@ set -e
 # Statics
 _DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )/"
 red=`tput setaf 1`; green=`tput setaf 2`; yellow=`tput setaf 3`; blue=`tput setaf 4`; magenta=`tput setaf 5`; bow=`tput setaf 0;tput setab 7`; reset=`tput sgr0`; hk="${blue})${reset}"; undl=`tput smul`; bold=`tput bold`;
+usage() { echo -e "Usage: $(basename "$0") [-d] [-q QuickConnect]\n\n    -d        Debug\n    -q <qc>   QuickConnect" 1>&2; exit 1; }
+
+# getopts
+P_QUICK=false
+P_DEBUG=false
+while getopts "q: d" o; do
+    case "${o}" in
+        d)  echo 'case d' && P_DEBUG=true ;;
+        q)  echo 'case q' && P_QUICK="$OPTARG" ;;
+        *)  usage ;;
+    esac
+done
+shift $(($OPTIND - 1))
+([[ "${P_QUICK}" == false ]] && [ ! -z "$1" ]) && P_QUICK="$1"
 
 #
 #       exitByError
@@ -32,6 +46,11 @@ function _jq() {
 #
 function validateInput() {
 
+    #
+    #   TODO
+    #   Catch 'b' to go back?
+    #
+
     # Only allow 0-9
     re='^[0-9]+$'
     if ! [[ $input =~ $re ]]; then
@@ -42,13 +61,12 @@ function validateInput() {
 
 #
 #       connectToServer()
-#       Creat and execute command
+#       Create and execute command
 #       Use $f_s as server json
 #
 function connectToServer() {
 
     # Get server data, use default by null
-    # echo -e "\n\n${f_s}\n\n"
     to_ip=$(echo "$f_s" | jq -r ".ip")
     to_port=$(echo "$f_s" | jq -r ".port // ${b_port}")
     to_user=$(echo "$f_s" | jq -r ".user // \"${b_user}\"")
@@ -62,7 +80,7 @@ function connectToServer() {
     [[ ! -z $to_rsub && "$to_rsub" != false ]] && TO_CMD="-R ${to_rsub}:localhost:${to_rsub} ${TO_CMD}"
     TO_CMD="ssh -A ${TO_CMD} -p ${to_port} ${to_user}@${to_ip}"
 
-    # Get gpg dat
+    # Get gpg data
 
     # Print '--' if depth > 0
     if [[ "$depth" -gt "0" ]]; then
@@ -76,6 +94,15 @@ ${undl}Connecting...${reset}
 ${bold}$(echo "$f_s" | jq -r ".name // \"--\"")${reset}
 ${green}${to_user}${reset}${bold}@${reset}${yellow}${to_ip}${reset}${bold}:${reset}${green}${to_port}${reset}
 EOF
+
+    # Check debug state
+    if [ "${P_DEBUG}" != false ]; then
+        echo -e "\n    +-------+\n    | ${red}Debug${reset} |\n    +-------+"
+    else
+
+        # Run ssh command
+        $TO_CMD
+    fi
 
     # We're done!
     exit 0
@@ -101,13 +128,13 @@ b_user=$(echo $raw | jq -r '.default.user // "root"')
 b_rsub=$(echo $raw | jq -r '.default.rsub // false')
 
 # Check for a qc param
-if [ ! -z $1 ]; then
+if [ "$P_QUICK" != false ]; then
 
     # Search and loop throug given QC
-    qc=$(echo $raw | jq -r ".. | select(.qc? == \"${1}\") // empty")
+    qc=$(echo $raw | jq -r ".. | select(.qc? == \"${P_QUICK}\") // empty")
 
     # Not found
-    [[ -z $qc ]] && exitByError "${bold}Q${reset}${red}uick-${bold}C${reset}${red}onnect not found!"
+    [[ -z $qc ]] && exitByError "${bold}Q${reset}${red}uick-${bold}C${reset}${red}onnect #${bold}${P_QUICK}${reset} ${red}not found!"
 
     # Connect
     f_s="${qc}" && connectToServer

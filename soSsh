@@ -46,7 +46,8 @@ function _jq() {
 #
 function validateInput() {
 
-    #   Catch 'b' to go back
+    # Catch 'b' to go back
+    # TODO: Show 'special' options in last line?
     if [[ $input == "b" ]]; then
 
         # Max 1 return

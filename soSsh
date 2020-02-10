@@ -54,7 +54,7 @@ function validateInput() {
     # Only allow 0-9
     re='^[0-9]+$'
     if ! [[ $input =~ $re ]]; then
-        echo -e "\n${red}\n\tInvalid response!${reset}\n"
+        echo -e "\n${red}Invalid response!${reset}"
         continue
     fi
 }
@@ -190,7 +190,7 @@ while [[ $reached_end == false ]]; do
         f_tmp=$(echo "$last_while_obj" | jq -r ".s[] | select(.id == ${input})")
 
         # Retry or continue
-        [[ -z $f_tmp ]] && echo -e "\n${red}${bold}Server${reset}${red} not found!${reset}\n" && continue
+        [[ -z $f_tmp ]] && echo -e "\n${red}${bold}Server${reset}${red} not found!${reset}" && continue
 
         # T
         has_t=$(echo "${f_tmp}" | jq ".t")

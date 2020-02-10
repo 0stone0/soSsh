@@ -46,10 +46,18 @@ function _jq() {
 #
 function validateInput() {
 
-    #
-    #   TODO
-    #   Catch 'b' to go back?
-    #
+    #   Catch 'b' to go back
+    if [[ $input == "b" ]]; then
+
+        # Max 1 return
+        if [ "$last_while_obj" != "$previous_while_obj" ]; then
+            last_while_obj="${previous_while_obj}"
+            ((depth--))
+            continue
+        else
+            continue
+        fi
+    fi
 
     # Only allow 0-9
     re='^[0-9]+$'
@@ -147,6 +155,7 @@ fi
 # Ask for servers until we've reached the end
 depth=1
 reached_end=false
+previous_while_obj=""
 last_while_obj="$raw"
 while [[ $reached_end == false ]]; do
 
@@ -174,7 +183,7 @@ while [[ $reached_end == false ]]; do
             continue
         else
             ((depth++))
-            last_while_obj="$f_tmp"
+            previous_while_obj="$last_while_obj" && last_while_obj="$f_tmp"
             continue
         fi
     fi

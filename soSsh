@@ -11,9 +11,9 @@ P_QUICK=false
 P_DEBUG=false
 while getopts "q: d" o; do
     case "${o}" in
-        d)  echo 'case d' && P_DEBUG=true ;;
-        q)  echo 'case q' && P_QUICK="$OPTARG" ;;
-        *)  usage ;;
+        d) P_DEBUG=true ;;
+        q) P_QUICK="$OPTARG" ;;
+        *) usage ;;
     esac
 done
 shift $(($OPTIND - 1))

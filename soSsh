@@ -131,7 +131,8 @@ if [ ! -f ~/.sossh ]; then
     exit 3
 fi
 
-# Read JSON
+# Validate & Read JSON
+jq -e type ~/.sossh >/dev/null 2>&1 || exitByError 'Invalid JSON!'
 raw=`jq . ~/.sossh`
 
 # Get some defaults

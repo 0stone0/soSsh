@@ -1,4 +1,3 @@
-
 # soSsh:
 Group based ssh connection script!
 

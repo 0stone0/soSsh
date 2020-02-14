@@ -46,6 +46,18 @@ function _jq() {
 #
 function validateInput() {
 
+    # Check for a scroll sequence
+    if [ $(echo "$input" | cat -v) == "^[" ]; then
+
+        # Read input until sequence is done
+        re='^A|C|D|B+$'
+        while [[ ! ($input =~ $re) ]]; do
+            read -sn1 input
+        done
+        echo -e "\n${red}Arrow keys are currently not supported :("
+        continue
+    fi
+
     # Catch 'b' to go back
     # TODO: Show 'special' options in last line?
     if [[ $input == "b" ]]; then
@@ -58,13 +70,6 @@ function validateInput() {
         else
             continue
         fi
-    fi
-
-    # Only allow 0-9
-    re='^[0-9]+$'
-    if ! [[ $input =~ $re ]]; then
-        echo -e "\n${red}Invalid response!${reset}"
-        continue
     fi
 }
 
@@ -177,11 +182,11 @@ while [[ $reached_end == false ]]; do
 
         # Read input && search for matching group id
         read -sn1 input && validateInput
-        f_tmp=`echo ${last_while_obj} | jq ".g[]  | select(.id == ${input})"`
+        f_tmp=`echo ${last_while_obj} | jq ".g[]  | select(.id|tostring == \"${input}\")"`
 
         # Retry or continue
         if [[ -z $f_tmp ]]; then
-            echo -e "\n${red}${bold}Group${reset}${red} not found!${reset}"
+            echo -e "\n${red}${bold}Group${reset}${red} not found: ${bold}${input}${reset}"
             continue
         else
             ((depth++))
@@ -202,7 +207,7 @@ while [[ $reached_end == false ]]; do
 
         # Read input & get matching server
         read -sn1 input && validateInput
-        f_tmp=$(echo "$last_while_obj" | jq -r ".s[] | select(.id == ${input})")
+        f_tmp=$(echo "$last_while_obj" | jq -r ".s[] | select(.id|tostring == \"${input}\")")
 
         # Retry or continue
         [[ -z $f_tmp ]] && echo -e "\n${red}${bold}Server${reset}${red} not found!${reset}" && continue

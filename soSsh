@@ -179,7 +179,7 @@ while [[ $reached_end == false ]]; do
         [[ ${#history[@]} -eq 0 ]] && history+=("$last_while_obj")
 
         # Show id & name of each group
-        echo -e "\n${prefix}${green}Select${reset} ${undl}group${reset}:\n"
+        echo -e "\n${prefix}${green}Select${reset} ${bold}$(echo $last_while_obj | jq -r ".name // \"Start\"")${reset} ${undl}group${reset}:\n"
         for row in $(echo "$last_while_obj" | jq -r '.g[] | @base64'); do
             echo -e "${prefix}    $(_jq $row '.id')${hk}  $(_jq $row '.name')"
         done

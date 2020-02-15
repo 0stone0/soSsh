@@ -62,14 +62,14 @@ function validateInput() {
     # TODO: Show 'special' options in last line?
     if [[ $input == "b" ]]; then
 
-        # Max 1 return
-        if [ "$last_while_obj" != "$previous_while_obj" ]; then
-            last_while_obj="${previous_while_obj}"
-            ((depth--))
-            continue
-        else
-            continue
-        fi
+        # Just re-ask if there is no history
+        [[ ${#history[@]} -eq 1 ]] && continue
+
+        # Go back, set new obj and shift array
+        ((depth--))
+        last_while_obj="$(echo ${history[($depth - 1)]]})"
+        unset 'history[${#history[@]}-1]'
+        continue
     fi
 }
 
@@ -161,6 +161,7 @@ fi
 
 # Ask for servers until we've reached the end
 depth=1
+history=()
 reached_end=false
 previous_while_obj=""
 last_while_obj="$raw"
@@ -171,8 +172,11 @@ while [[ $reached_end == false ]]; do
     prefix=`printf %\ ${prefin}s|tr \  \ `
 
     # G
-    has_g=$(echo "$last_while_obj " | jq ".g")
+    has_g=$(echo "$last_while_obj" | jq ".g")
     if [[ "$has_g" != 'null' ]]; then
+
+        # If there is no history, add first group
+        [[ ${#history[@]} -eq 0 ]] && history+=("$last_while_obj")
 
         # Show id & name of each group
         echo -e "\n${prefix}${green}Select${reset} ${undl}group${reset}:\n"
@@ -190,7 +194,7 @@ while [[ $reached_end == false ]]; do
             continue
         else
             ((depth++))
-            previous_while_obj="$last_while_obj" && last_while_obj="$f_tmp"
+            history+=("$f_tmp") && previous_while_obj="$last_while_obj" && last_while_obj="$f_tmp"
             continue
         fi
     fi

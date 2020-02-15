@@ -3,7 +3,7 @@ set -e
 
 # Statics
 _DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )/"
-red=`tput setaf 1`; green=`tput setaf 2`; yellow=`tput setaf 3`; blue=`tput setaf 4`; magenta=`tput setaf 5`; bow=`tput setaf 0;tput setab 7`; reset=`tput sgr0`; hk="${blue})${reset}"; undl=`tput smul`; bold=`tput bold`;
+red=`tput setaf 1`; green=`tput setaf 2`; yellow=`tput setaf 3`; blue=`tput setaf 4`; magenta=`tput setaf 5`; cyan=`tput setaf 6`; bow=`tput setaf 0;tput setab 7`; reset=`tput sgr0`; hk="${blue})${reset}"; undl=`tput smul`; bold=`tput bold`;
 usage() { echo -e "Usage: $(basename "$0") [-d] [-q QuickConnect]\n\n    -d        Debug\n    -q <qc>   QuickConnect" 1>&2; exit 1; }
 
 # getopts
@@ -40,6 +40,15 @@ function _jq() {
 }
 
 #
+#       notFound
+#       Shows not found error
+#       $1 --> Group/Server
+#
+function notFound() {
+    echo -e "\n${red}${undl}${1}${reset} ${red}#${bold}${input}${reset}${red} not found!${reset}"
+}
+
+#
 #       validateInput
 #       Validates user input
 #       Skip's while loop if invalid
@@ -61,6 +70,9 @@ function validateInput() {
     # Catch 'b' to go back
     # TODO: Show 'special' options in last line?
     if [[ $input == "b" ]]; then
+
+        # Show arrow
+        echo -e "\n${prefix}${cyan}<---${reset}"
 
         # Just re-ask if there is no history
         [[ ${#history[@]} -eq 1 ]] && continue
@@ -190,8 +202,7 @@ while [[ $reached_end == false ]]; do
 
         # Retry or continue
         if [[ -z $f_tmp ]]; then
-            echo -e "\n${red}${bold}Group${reset}${red} not found: ${bold}${input}${reset}"
-            continue
+            notFound "Group" && continue
         else
             ((depth++))
             history+=("$f_tmp") && previous_while_obj="$last_while_obj" && last_while_obj="$f_tmp"
@@ -214,7 +225,7 @@ while [[ $reached_end == false ]]; do
         f_tmp=$(echo "$last_while_obj" | jq -r ".s[] | select(.id|tostring == \"${input}\")")
 
         # Retry or continue
-        [[ -z $f_tmp ]] && echo -e "\n${red}${bold}Server${reset}${red} not found!${reset}" && continue
+        [[ -z $f_tmp ]] && notFound "Server" && continue
 
         # T
         has_t=$(echo "${f_tmp}" | jq ".t")
@@ -250,9 +261,7 @@ while [[ $reached_end == false ]]; do
             t_w_r=false; while [[ $t_w_r == false ]]; do
                 read -sn1 input && validateInput
                 if [[ "$input" -lt "0" ]] || [[ "$input" -gt "$has_t" ]]; then
-                    # Retry
-                    echo -e "\n${red}${bold}Server #${input}${reset}${red} not found!${reset}\n"
-                    continue
+                    notFound "Server" && continue
                 fi
                 t_w_r=true
             done

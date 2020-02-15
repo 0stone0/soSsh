@@ -25,7 +25,7 @@ shift $(($OPTIND - 1))
 #       $! --> 1
 #
 function exitByError() {
-    echo -e "\n${red}\n\t${@}${reset}\n"
+    echo -e "${red}\n\t${@}${reset}\n"
     exit 1
 }
 
@@ -82,7 +82,7 @@ function getUserInput() {
 
         # Go back, set new obj and shift array
         ((depth--))
-        last_while_obj="$(echo ${history[($depth - 1)]]})"
+        last_while_obj="$(echo ${history[$(($depth - 1))]]})"
         unset 'history[${#history[@]}-1]'
         continue
     fi

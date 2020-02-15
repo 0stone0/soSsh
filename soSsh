@@ -47,7 +47,7 @@ function _jq() {
 function validateInput() {
 
     # Check for a scroll sequence
-    if [ $(echo "$input" | cat -v) == "^[" ]; then
+    if [[ $(echo "$input" | cat -v) == "^[" ]]; then
 
         # Read input until sequence is done
         re='^A|C|D|B+$'

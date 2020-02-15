@@ -49,11 +49,14 @@ function notFound() {
 }
 
 #
-#       validateInput
-#       Validates user input
+#       getUserInput
+#       Asks and validate user input to $input
 #       Skip's while loop if invalid
 #
-function validateInput() {
+function getUserInput() {
+
+    # Ask user
+    read -sn1 input
 
     # Check for a scroll sequence
     if [[ $(echo "$input" | cat -v) == "^[" ]]; then
@@ -197,7 +200,7 @@ while [[ $reached_end == false ]]; do
         done
 
         # Read input && search for matching group id
-        read -sn1 input && validateInput
+        getUserInput
         f_tmp=`echo ${last_while_obj} | jq ".g[]  | select(.id|tostring == \"${input}\")"`
 
         # Retry or continue
@@ -221,7 +224,7 @@ while [[ $reached_end == false ]]; do
         done
 
         # Read input & get matching server
-        read -sn1 input && validateInput
+        getUserInput
         f_tmp=$(echo "$last_while_obj" | jq -r ".s[] | select(.id|tostring == \"${input}\")")
 
         # Retry or continue
@@ -259,7 +262,7 @@ while [[ $reached_end == false ]]; do
 
             # Read and validate input until valid
             t_w_r=false; while [[ $t_w_r == false ]]; do
-                read -sn1 input && validateInput
+                getUserInput
                 if [[ "$input" -lt "0" ]] || [[ "$input" -gt "$has_t" ]]; then
                     notFound "Server" && continue
                 fi

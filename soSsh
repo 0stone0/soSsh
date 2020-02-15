@@ -242,26 +242,27 @@ while [[ $reached_end == false ]]; do
             g_b_name_c="${g_b_name%\"}" && g_b_name_c="${g_b_name_c#\"}"
             g_b_name_c=$(echo ${g_b_name_c/\?\?/${red}X${reset}})
 
-            # For .t times
-            echo -e "\n${prefix}    ${green}Select${reset} ${bold}${g_b_name_c}${reset} ${undl}server${reset}:\n"
-            for (( i = 0; i < has_t; i++ )); do
-
-                # Create h_i (++)
-                t_i=$i
-                h_i=$(expr $t_i \+ 1)
-
-                # Remove quotes
-                t_ip="${g_b_ip%\"}" && t_ip="${t_ip#\"}"
-                t_name="${g_b_name%\"}" && t_name="${t_name#\"}"
-
-                # Replace '??' --> $i
-                t_ip=$(echo ${t_ip/\?\?/$h_i})
-                t_name=$(echo ${t_name/\?\?/$h_i})
-                echo -e "${prefix}        ${h_i}${hk} ${t_name} ($t_ip)"
-            done
-
             # Read and validate input until valid
             t_w_r=false; while [[ $t_w_r == false ]]; do
+
+                # For .t times
+                echo -e "\n${prefix}    ${green}Select${reset} ${bold}${g_b_name_c}${reset} ${undl}server${reset}:\n"
+                for (( i = 0; i < has_t; i++ )); do
+
+                    # Create h_i (++)
+                    t_i=$i
+                    h_i=$(expr $t_i \+ 1)
+
+                    # Remove quotes
+                    t_ip="${g_b_ip%\"}" && t_ip="${t_ip#\"}"
+                    t_name="${g_b_name%\"}" && t_name="${t_name#\"}"
+
+                    # Replace '??' --> $i
+                    t_ip=$(echo ${t_ip/\?\?/$h_i})
+                    t_name=$(echo ${t_name/\?\?/$h_i})
+                    echo -e "${prefix}        ${h_i}${hk} ${t_name} ($t_ip)"
+                done
+
                 getUserInput
                 if [[ "$input" -lt "0" ]] || [[ "$input" -gt "$has_t" ]]; then
                     notFound "Server" && continue

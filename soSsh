@@ -189,9 +189,7 @@ while [[ $reached_end == false ]]; do
 
         # Show id & name of each group
         echo -e "\n${prefix}${green}Select${reset} ${bold}$(echo $last_while_obj | jq -r ".name // \"Start\"")${reset} ${undl}group${reset}:\n"
-        for row in $(echo "$last_while_obj" | jq -r '.g[] | @base64'); do
-            echo -e "${prefix}    $(_jq $row '.id')${hk}  $(_jq $row '.name')"
-        done
+        jq --arg prefix "${prefix}" --arg hk "${hk}" -r '.g[] | "   \($prefix) \(.id)\($hk)  \(.name)"' <<< $last_while_obj
 
         # Read input && search for matching group id
         getUserInput
@@ -213,9 +211,7 @@ while [[ $reached_end == false ]]; do
 
         # Show id & name of each server
         echo -e "\n${prefix}${green}Select${reset} ${bold}$(echo "$last_while_obj" | jq -r ".name ")${reset} ${undl}server${reset}:\n"
-        for row in $(echo "$last_while_obj" | jq -r '.s[] | @base64'); do
-            echo -e "${prefix}    $(_jq $row '.id')${hk} $(_jq $row '.name')"
-        done
+        jq --arg prefix "${prefix}" --arg hk "${hk}" -r '.s[] | "   \($prefix) \(.id)\($hk) \(.name)"' <<< $last_while_obj
 
         # Read input & get matching server
         getUserInput

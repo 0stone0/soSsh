@@ -235,11 +235,10 @@ while [[ $reached_end == false ]]; do
         if [[ ! -z $has_t && "$has_t" != '' && "$has_t" != null ]]; then
 
             # Remember base_name and base_user
-            g_b_name=$(echo $f_tmp | jq '.name')
-            g_b_ip="$(echo $f_tmp | jq '.ip')"
+            g_b_name=$(echo $f_tmp | jq -r '.name')
+            g_b_ip="$(echo $f_tmp | jq -r '.ip')"
 
             # Create clean group name
-            g_b_name_c="${g_b_name%\"}" && g_b_name_c="${g_b_name_c#\"}"
             g_b_name_c=$(echo ${g_b_name_c/\?\?/${red}X${reset}})
 
             # Read and validate input until valid
@@ -253,14 +252,18 @@ while [[ $reached_end == false ]]; do
                     t_i=$i
                     h_i=$(expr $t_i \+ 1)
 
-                    # Remove quotes
-                    t_ip="${g_b_ip%\"}" && t_ip="${t_ip#\"}"
-                    t_name="${g_b_name%\"}" && t_name="${t_name#\"}"
+                    # # Remove quotes
+                    # echo "--> ${g_b_ip}"
+                    # # t_ip="${g_b_ip%\"}" && t_ip="${t_ip#\"}"
+                    # # t_name="${g_b_name%\"}" && t_name="${t_name#\"}"
+
+                    # echo "done"
 
                     # Replace '??' --> $i
-                    t_ip=$(echo ${t_ip/\?\?/$h_i})
-                    t_name=$(echo ${t_name/\?\?/$h_i})
-                    echo -e "${prefix}        ${h_i}${hk} ${t_name} ($t_ip)"
+                    g_b_ip=$(echo ${g_b_ip/\?\?/$h_i})
+
+                    g_b_name=$(echo ${g_b_name/\?\?/$h_i})
+                    echo -e "${prefix}        ${h_i}${hk} ${g_b_name} ($g_b_ip)"
                 done
 
                 getUserInput
@@ -275,7 +278,7 @@ while [[ $reached_end == false ]]; do
             f_name=$(echo ${g_b_name/\?\?/$input})
 
             # Set $f_s to custom object
-            f_s="{ \"id\": ${has_t}, \"user\": $(echo $f_tmp | jq '.user'), \"name\": ${f_name}, \"ip\": ${f_ip}, \"rsub\": \"false\" }"
+            f_s="{ \"id\": ${has_t}, \"user\": $(echo $f_tmp | jq '.user'), \"name\": \"${f_name}\", \"ip\": \"${f_ip}\", \"rsub\": \"false\" }"
             reached_end=true
             ((depth++)) && continue
         fi

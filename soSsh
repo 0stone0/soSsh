@@ -189,7 +189,7 @@ while [[ $reached_end == false ]]; do
 
         # Show id & name of each group
         echo -e "\n${prefix}${green}Select${reset} ${bold}$(echo $last_while_obj | jq -r ".name // \"Start\"")${reset} ${undl}group${reset}:\n"
-        jq --arg prefix "${prefix}" --arg hk "${hk}" -r '.g[] | "   \($prefix) \(.id)\($hk)  \(.name)"' <<< $last_while_obj
+        jq --arg prefix "${prefix}" --arg hk "${hk}" -r '.g[] | "   \($prefix) \(.id)\($hk) \(.name)"' <<< $last_while_obj
 
         # Read input && search for matching group id
         getUserInput

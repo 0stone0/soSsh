@@ -188,12 +188,13 @@ while [[ $reached_end == false ]]; do
         [[ ${#history[@]} -eq 0 ]] && history+=("$last_while_obj")
 
         # Show id & name of each group
-        echo -e "\n${prefix}${green}Select${reset} ${bold}$(echo $last_while_obj | jq -r ".name // \"Start\"")${reset} ${undl}group${reset}:\n"
+        groupname=$(jq -r ".name // \"Start\"" <<< $last_while_obj)
+        echo -e "\n${prefix}${green}Select${reset} ${bold}${groupname}${reset} ${undl}group${reset}:\n"
         jq --arg prefix "${prefix}" --arg hk "${hk}" -r '.g[] | "   \($prefix) \(.id)\($hk) \(.name)"' <<< $last_while_obj
 
         # Read input && search for matching group id
         getUserInput
-        f_tmp=`echo ${last_while_obj} | jq ".g[]  | select(.id|tostring == \"${input}\")"`
+        f_tmp=$(jq ".g[]  | select(.id|tostring == \"${input}\")" <<< $last_while_obj)
 
         # Retry or continue
         if [[ -z $f_tmp ]]; then
@@ -206,27 +207,27 @@ while [[ $reached_end == false ]]; do
     fi
 
     # S
-    has_s=$(echo "$last_while_obj " | jq ".s")
+    has_s=$(jq ".s" <<< $last_while_obj)
     if [[ "$has_s" != 'null' ]]; then
 
         # Show id & name of each server
-        echo -e "\n${prefix}${green}Select${reset} ${bold}$(echo "$last_while_obj" | jq -r ".name ")${reset} ${undl}server${reset}:\n"
+        echo -e "\n${prefix}${green}Select${reset} ${bold}$(jq -r ".name" <<< $last_while_obj)${reset} ${undl}server${reset}:\n"
         jq --arg prefix "${prefix}" --arg hk "${hk}" -r '.s[] | "   \($prefix) \(.id)\($hk) \(.name)"' <<< $last_while_obj
 
         # Read input & get matching server
         getUserInput
-        f_tmp=$(echo "$last_while_obj" | jq -r ".s[] | select(.id|tostring == \"${input}\")")
+        f_tmp=$(jq -r ".s[] | select(.id|tostring == \"${input}\")" <<< $last_while_obj)
 
         # Retry or continue
         [[ -z $f_tmp ]] && notFound "Server" && continue
 
         # T
-        has_t=$(echo "${f_tmp}" | jq ".t")
+        has_t=$(jq ".t" <<< "$f_tmp")
         if [[ ! -z $has_t && "$has_t" != '' && "$has_t" != null ]]; then
 
             # Remember base_name and base_user
-            g_b_name=$(echo $f_tmp | jq -r '.name')
-            g_b_ip="$(echo $f_tmp | jq -r '.ip')"
+            g_b_name=$(jq -r '.name' <<< $f_tmp)
+            g_b_ip="$(jq -r '.ip' <<< $f_tmp)"
 
             # Create clean group name
             g_b_name_c=$(echo ${g_b_name_c/\?\?/${red}X${reset}})
@@ -243,9 +244,9 @@ while [[ $reached_end == false ]]; do
                     h_i=$(expr $t_i \+ 1)
 
                     # Replace '??' --> $i
-                    g_b_ip=$(echo ${g_b_ip/\?\?/$h_i})
-                    g_b_name=$(echo ${g_b_name/\?\?/$h_i})
-                    echo -e "${prefix}        ${h_i}${hk} ${g_b_name} ($g_b_ip)"
+                    c_g_b_ip=$(echo ${g_b_ip/\?\?/$h_i})
+                    c_g_b_name=$(echo ${g_b_name/\?\?/$h_i})
+                    echo -e "${prefix}        ${h_i}${hk} ${c_g_b_name} ($c_g_b_ip)"
                 done
 
                 getUserInput

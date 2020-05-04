@@ -229,11 +229,8 @@ while [[ $reached_end == false ]]; do
                 echo -e "\n${prefix}    ${green}Select${reset} ${bold}${g_b_name_c}${reset} ${undl}server${reset}:\n"
                 for (( i = 0; i < has_t; i++ )); do
 
-                    # Create h_i (++)
-                    t_i=$i
-                    h_i=$(expr $t_i \+ 1)
-
                     # Replace '??' --> $i
+                    h_i=$(expr $i \+ 1)
                     c_g_b_ip=$(echo ${g_b_ip/\?\?/$h_i})
                     c_g_b_name=$(echo ${g_b_name/\?\?/$h_i})
                     echo -e "${prefix}        ${h_i}${hk} ${c_g_b_name} ($c_g_b_ip)"

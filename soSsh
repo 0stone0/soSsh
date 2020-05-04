@@ -128,14 +128,8 @@ ${bold}$(echo "$f_s" | jq -r ".name // \"--\"")${reset}
 ${green}${to_user}${reset}${bold}@${reset}${yellow}${to_ip}${reset}${bold}:${reset}${green}${to_port}${reset}
 EOF
 
-    # Check debug state
-    if [ "${P_DEBUG}" != false ]; then
-        echo -e "\n    +-------+\n    | ${red}Debug${reset} |\n    +-------+"
-    else
-
-        # Run ssh command
-        $TO_CMD
-    fi
+    # Run SSH command, or show debug warning
+    [[ "${P_DEBUG}" == "true" ]] && echo -e "\n    +-------+\n    | ${red}Debug${reset} |\n    +-------+" || $TO_CMD
 
     # We're done!
     exit 0
@@ -252,16 +246,8 @@ while [[ $reached_end == false ]]; do
                     t_i=$i
                     h_i=$(expr $t_i \+ 1)
 
-                    # # Remove quotes
-                    # echo "--> ${g_b_ip}"
-                    # # t_ip="${g_b_ip%\"}" && t_ip="${t_ip#\"}"
-                    # # t_name="${g_b_name%\"}" && t_name="${t_name#\"}"
-
-                    # echo "done"
-
                     # Replace '??' --> $i
                     g_b_ip=$(echo ${g_b_ip/\?\?/$h_i})
-
                     g_b_name=$(echo ${g_b_name/\?\?/$h_i})
                     echo -e "${prefix}        ${h_i}${hk} ${g_b_name} ($g_b_ip)"
                 done

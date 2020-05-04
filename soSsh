@@ -30,16 +30,6 @@ function exitByError() {
 }
 
 #
-#       _jq
-#       Decodes and search for json key/value
-#       $1 --> json
-#       $2 --> key
-#
-function _jq() {
-    echo ${1} | base64 --decode | jq -r ${2}
-}
-
-#
 #       notFound
 #       Shows not found error
 #       $1 --> Group/Server
